@@ -1,7 +1,7 @@
 {
-  "name": "expo-ecommerce",
+  "name": "ecommerce_project",
   "version": "1.0.0",
-  "description": "",
+  "description": "<<<<<<< HEAD\r # Ecommerce_Web_App_Backend\r This is a full project for App, Website and Backend attached to it\r =======\r <h1 align=\"center\">✨ Full-Stack E-Commerce App (Mobile + Admin + API) ✨</h1>",
   "main": "index.js",
   "engines": {
     "node": ">=20.0.0"
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/burakorkmez/expo-ecommerce.git"
+    "url": "git+https://github.com/Vickyjohnson2004/Ecommerce_Web_App_Backend.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/burakorkmez/expo-ecommerce/issues"
+    "url": "https://github.com/Vickyjohnson2004/Ecommerce_Web_App_Backend/issues"
   },
-  "homepage": "https://github.com/burakorkmez/expo-ecommerce#readme"
+  "homepage": "https://github.com/Vickyjohnson2004/Ecommerce_Web_App_Backend#readme"
 }

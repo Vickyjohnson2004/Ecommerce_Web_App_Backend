@@ -32,7 +32,7 @@ app.use(
       express.json()(req, res, next); // parse json for non-webhook routes
     }
   },
-  paymentRoutes
+  paymentRoutes,
 );
 
 app.use(express.json());
