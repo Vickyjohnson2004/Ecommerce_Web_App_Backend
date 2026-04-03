@@ -40,5 +40,5 @@ createRoot(document.getElementById("root")).render(
         </QueryClientProvider>
       </ClerkProvider>
     </BrowserRouter>
-  </StrictMode>
+  </StrictMode>,
 );
