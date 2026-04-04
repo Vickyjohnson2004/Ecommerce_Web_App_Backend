@@ -38,14 +38,20 @@ app.use(
 app.use(express.json());
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:8081/",
   "https://ecommerce-web-silk.vercel.app",
-  "https://ecommerce-lvz9gxvdp-victor-johnsons-projects.vercel.app",
+  "http://localhost:8081",
+  "https://ecommerce-m3zf6mgr8-victor-johnsons-projects.vercel.app",
 ];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
