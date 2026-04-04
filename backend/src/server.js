@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import path from "path";
 import { clerkMiddleware } from "@clerk/express";
@@ -5,7 +6,6 @@ import { serve } from "inngest/express";
 import cors from "cors";
 
 import { functions, inngest } from "./config/inngest.js";
-
 import { ENV } from "./config/env.js";
 import { connectDB } from "./config/db.js";
 
@@ -18,28 +18,15 @@ import cartRoutes from "./routes/cart.route.js";
 import paymentRoutes from "./routes/payment.route.js";
 
 const app = express();
-
 const __dirname = path.resolve();
 
-// special handling: Stripe webhook needs raw body BEFORE any body parsing middleware
-// apply raw body parser conditionally only to webhook endpoint
-app.use(
-  "/api/payment",
-  (req, res, next) => {
-    if (req.originalUrl === "/api/payment/webhook") {
-      express.raw({ type: "application/json" })(req, res, next);
-    } else {
-      express.json()(req, res, next); // parse json for non-webhook routes
-    }
-  },
-  paymentRoutes,
-);
-
-app.use(express.json());
+// ----------------------
+// 1️⃣ CORS (must come BEFORE Clerk middleware)
+// ----------------------
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://ecommerce-web-silk.vercel.app",
   "http://localhost:8081",
+  "https://ecommerce-web-silk.vercel.app",
   "https://ecommerce-m3zf6mgr8-victor-johnsons-projects.vercel.app",
 ];
 
@@ -52,38 +39,79 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true,
+    credentials: true, // allow cookies to be sent
   }),
 );
-app.use(clerkMiddleware()); // adds auth object under the req => req.auth
 
+// ----------------------
+// 2️⃣ JSON parser
+// ----------------------
+app.use(express.json());
+
+// ----------------------
+// 3️⃣ Clerk auth middleware
+// ----------------------
+app.use(clerkMiddleware());
+
+// ----------------------
+// 4️⃣ Payment routes (Stripe webhook raw body handling)
+// ----------------------
+app.use(
+  "/api/payment",
+  (req, res, next) => {
+    if (req.originalUrl === "/api/payment/webhook") {
+      express.raw({ type: "application/json" })(req, res, next);
+    } else {
+      express.json()(req, res, next);
+    }
+  },
+  paymentRoutes,
+);
+
+// ----------------------
+// 5️⃣ Inngest server
+// ----------------------
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
-app.use("/api/admin", adminRoutes);
+// ----------------------
+// 6️⃣ API routes
+// ----------------------
+app.use("/api/admin", adminRoutes); // make sure admin routes use requireAuth({ redirectUrl: null })
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 
+// Health check
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Success" });
 });
 
-// make our app ready for deployment
+// ----------------------
+// 7️⃣ Production: serve frontend
+// ----------------------
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../admin/dist")));
 
-  app.get("/{*any}", (req, res) => {
-    res.sendFile(path.join(__dirname, "../admin", "dist", "index.html"));
+  // Serve index.html for all unmatched routes
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../admin/dist/index.html"));
   });
 }
 
+// ----------------------
+// 8️⃣ Start server
+// ----------------------
 const startServer = async () => {
-  await connectDB();
-  app.listen(ENV.PORT, () => {
-    console.log("Server is up and running");
-  });
+  try {
+    await connectDB();
+    app.listen(ENV.PORT, () => {
+      console.log(`Server running on port ${ENV.PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+  }
 };
 
 startServer();
