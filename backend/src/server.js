@@ -36,22 +36,26 @@ app.use(
 );
 
 app.use(express.json());
-
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:8081/",
   "https://ecommerce-web-silk.vercel.app",
-  "https://ecommerce-lvz9gxvdp-victor-johnsons-projects.vercel.app",
+  "http://localhost:8081",
+  "https://ecommerce-m3zf6mgr8-victor-johnsons-projects.vercel.app",
 ];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
 app.use(clerkMiddleware()); // adds auth object under the req => req.auth
-// app.use(cors({ origin: ENV.CLIENT_URL, credentials: true })); // credentials: true allows the browser to send the cookies to the server with the request
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
