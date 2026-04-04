@@ -36,7 +36,6 @@ app.use(
 );
 
 app.use(express.json());
-app.use(clerkMiddleware()); // adds auth object under the req => req.auth
 const allowedOrigins = [
   "http://localhost:5173",
   "https://ecommerce-web-silk.vercel.app",
@@ -56,6 +55,7 @@ app.use(
     credentials: true,
   }),
 );
+app.use(clerkMiddleware()); // adds auth object under the req => req.auth
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
