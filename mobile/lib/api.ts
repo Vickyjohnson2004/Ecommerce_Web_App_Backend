@@ -3,10 +3,11 @@ import axios from "axios";
 import { useEffect } from "react";
 
 // // localhost will work in simulator
-const API_URL = "http://localhost:3000/api";
+// const API_URL = "http://localhost:3000/api";
 
 // prod url will work in your physical device
-// const API_URL = "https://ecommerce-backend-git-main-victor-johnsons-projects.vercel.app";
+const API_URL =
+  "https://ecommerce-backend-git-main-victor-johnsons-projects.vercel.app";
 
 const api = axios.create({
   baseURL: API_URL,
