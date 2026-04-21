@@ -1,26 +1,39 @@
-import { requireAuth } from "@clerk/express";
+import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 import { ENV } from "../config/env.js";
 
-export const protectRoute = [
-  requireAuth(),
-  async (req, res, next) => {
-    try {
-      const clerkId = req.auth().userId;
-      if (!clerkId) return res.status(401).json({ message: "Unauthorized - invalid token" });
+export const protectRoute = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
 
-      const user = await User.findOne({ clerkId });
-      if (!user) return res.status(404).json({ message: "User not found" });
-
-      req.user = user;
-
-      next();
-    } catch (error) {
-      console.error("Error in protectRoute middleware", error);
-      res.status(500).json({ message: "Internal server error" });
+    if (!token) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized - no token provided" });
     }
-  },
-];
+
+    const decoded = jwt.verify(token, ENV.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Error in protectRoute middleware:", error);
+
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Unauthorized - invalid token" });
+    }
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Unauthorized - token expired" });
+    }
+
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const adminOnly = (req, res, next) => {
   if (!req.user) {

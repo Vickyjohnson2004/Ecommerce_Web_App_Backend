@@ -60,10 +60,6 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    clerkId: {
-      type: String,
-      required: true,
-    },
     orderItems: [orderItemSchema],
     shippingAddress: {
       type: shippingAddressSchema,
@@ -90,7 +86,7 @@ const orderSchema = new mongoose.Schema(
       type: Date,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Order = mongoose.model("Order", orderSchema);

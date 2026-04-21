@@ -10,12 +10,10 @@ import {
 
 const router = Router();
 
-router.use(protectRoute);
-
-router.get("/", getCart);
-router.post("/", addToCart);
-router.put("/:productId", updateCartItem);
-router.delete("/:productId", removeFromCart);
-router.delete("/", clearCart);
+router.get("/", protectRoute, getCart);
+router.post("/", protectRoute, addToCart);
+router.put("/:productId", protectRoute, updateCartItem);
+router.delete("/:productId", protectRoute, removeFromCart);
+router.delete("/", protectRoute, clearCart);
 
 export default router;

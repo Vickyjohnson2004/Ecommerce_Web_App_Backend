@@ -1,9 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useApi } from "@/lib/api";
+import api from "@/lib/api";
 import { Cart } from "@/types";
 
 const useCart = () => {
-  const api = useApi();
   const queryClient = useQueryClient();
 
   const {
@@ -19,16 +18,33 @@ const useCart = () => {
   });
 
   const addToCartMutation = useMutation({
-    mutationFn: async ({ productId, quantity = 1 }: { productId: string; quantity?: number }) => {
-      const { data } = await api.post<{ cart: Cart }>("/cart", { productId, quantity });
+    mutationFn: async ({
+      productId,
+      quantity = 1,
+    }: {
+      productId: string;
+      quantity?: number;
+    }) => {
+      const { data } = await api.post<{ cart: Cart }>("/cart", {
+        productId,
+        quantity,
+      });
       return data.cart;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
   });
 
   const updateQuantityMutation = useMutation({
-    mutationFn: async ({ productId, quantity }: { productId: string; quantity: number }) => {
-      const { data } = await api.put<{ cart: Cart }>(`/cart/${productId}`, { quantity });
+    mutationFn: async ({
+      productId,
+      quantity,
+    }: {
+      productId: string;
+      quantity: number;
+    }) => {
+      const { data } = await api.put<{ cart: Cart }>(`/cart/${productId}`, {
+        quantity,
+      });
       return data.cart;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
@@ -51,9 +67,13 @@ const useCart = () => {
   });
 
   const cartTotal =
-    cart?.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0) ?? 0;
+    cart?.items.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0,
+    ) ?? 0;
 
-  const cartItemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  const cartItemCount =
+    cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   return {
     cart,

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useApi } from "@/lib/api";
+import api from "@/lib/api";
 
 interface CreateReviewData {
   productId: string;
@@ -8,7 +8,6 @@ interface CreateReviewData {
 }
 
 export const useReviews = () => {
-  const api = useApi();
   const queryClient = useQueryClient();
 
   const createReview = useMutation({
