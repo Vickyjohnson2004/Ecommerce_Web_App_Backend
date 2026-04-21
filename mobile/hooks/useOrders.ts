@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useApi } from "@/lib/api";
+import api from "@/lib/api";
 import { Order } from "@/types";
 
 export const useOrders = () => {
-  const api = useApi();
-
   return useQuery<Order[]>({
     queryKey: ["orders"],
     queryFn: async () => {

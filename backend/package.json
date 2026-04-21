@@ -13,14 +13,14 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@clerk/express": "^1.7.76",
+    "bcryptjs": "^2.4.3",
     "cloudinary": "^2.8.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "inngest": "^3.46.0",
-    "mongoose": "^8.19.3",
-    "multer": "^2.0.2",
-    "stripe": "^19.3.1"
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "multer": "^1.4.5-lts.1",
+    "stripe": "^14.0.0"
   }
 }

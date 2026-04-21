@@ -1,9 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useApi } from "@/lib/api";
+import api from "@/lib/api";
 import { Address } from "@/types";
 
 export const useAddresses = () => {
-  const api = useApi();
   const queryClient = useQueryClient();
 
   const {
@@ -13,14 +12,19 @@ export const useAddresses = () => {
   } = useQuery({
     queryKey: ["addresses"],
     queryFn: async () => {
-      const { data } = await api.get<{ addresses: Address[] }>("/users/addresses");
+      const { data } = await api.get<{ addresses: Address[] }>(
+        "/users/addresses",
+      );
       return data.addresses;
     },
   });
 
   const addAddressMutation = useMutation({
     mutationFn: async (addressData: Omit<Address, "_id">) => {
-      const { data } = await api.post<{ addresses: Address[] }>("/users/addresses", addressData);
+      const { data } = await api.post<{ addresses: Address[] }>(
+        "/users/addresses",
+        addressData,
+      );
       return data.addresses;
     },
     onSuccess: () => {
@@ -38,7 +42,7 @@ export const useAddresses = () => {
     }) => {
       const { data } = await api.put<{ addresses: Address[] }>(
         `/users/addresses/${addressId}`,
-        addressData
+        addressData,
       );
       return data.addresses;
     },
@@ -49,7 +53,9 @@ export const useAddresses = () => {
 
   const deleteAddressMutation = useMutation({
     mutationFn: async (addressId: string) => {
-      const { data } = await api.delete<{ addresses: Address[] }>(`/users/addresses/${addressId}`);
+      const { data } = await api.delete<{ addresses: Address[] }>(
+        `/users/addresses/${addressId}`,
+      );
       return data.addresses;
     },
     onSuccess: () => {

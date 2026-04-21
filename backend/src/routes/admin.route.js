@@ -14,20 +14,35 @@ import { upload } from "../middleware/multer.middleware.js";
 
 const router = Router();
 
-// optimization - DRY
-router.use(protectRoute, adminOnly);
+// All admin routes require authentication and admin privileges
+router.post(
+  "/products",
+  protectRoute,
+  adminOnly,
+  upload.array("images", 3),
+  createProduct,
+);
+router.get("/products", protectRoute, adminOnly, getAllProducts);
+router.put(
+  "/products/:id",
+  protectRoute,
+  adminOnly,
+  upload.array("images", 3),
+  updateProduct,
+);
+router.delete("/products/:id", protectRoute, adminOnly, deleteProduct);
 
-router.post("/products", upload.array("images", 3), createProduct);
-router.get("/products", getAllProducts);
-router.put("/products/:id", upload.array("images", 3), updateProduct);
-router.delete("/products/:id", deleteProduct);
+router.get("/orders", protectRoute, adminOnly, getAllOrders);
+router.patch(
+  "/orders/:orderId/status",
+  protectRoute,
+  adminOnly,
+  updateOrderStatus,
+);
 
-router.get("/orders", getAllOrders);
-router.patch("/orders/:orderId/status", updateOrderStatus);
+router.get("/customers", protectRoute, adminOnly, getAllCustomers);
 
-router.get("/customers", getAllCustomers);
-
-router.get("/stats", getDashboardStats);
+router.get("/stats", protectRoute, adminOnly, getDashboardStats);
 
 // PUT: Used for full resource replacement, updating the entire resource
 // PATCH: Used for partial resource updates, updating a specific part of the resource

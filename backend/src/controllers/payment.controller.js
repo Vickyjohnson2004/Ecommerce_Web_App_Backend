@@ -24,11 +24,15 @@ export async function createPaymentIntent(req, res) {
     for (const item of cartItems) {
       const product = await Product.findById(item.product._id);
       if (!product) {
-        return res.status(404).json({ error: `Product ${item.product.name} not found` });
+        return res
+          .status(404)
+          .json({ error: `Product ${item.product.name} not found` });
       }
 
       if (product.stock < item.quantity) {
-        return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
+        return res
+          .status(400)
+          .json({ error: `Insufficient stock for ${product.name}` });
       }
 
       subtotal += product.price * item.quantity;
@@ -60,7 +64,6 @@ export async function createPaymentIntent(req, res) {
         email: user.email,
         name: user.name,
         metadata: {
-          clerkId: user.clerkId,
           userId: user._id.toString(),
         },
       });
@@ -78,7 +81,6 @@ export async function createPaymentIntent(req, res) {
         enabled: true,
       },
       metadata: {
-        clerkId: user.clerkId,
         userId: user._id.toString(),
         orderItems: JSON.stringify(validatedItems),
         shippingAddress: JSON.stringify(shippingAddress),
@@ -99,7 +101,11 @@ export async function handleWebhook(req, res) {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, ENV.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      ENV.STRIPE_WEBHOOK_SECRET,
+    );
   } catch (err) {
     console.error("Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -111,10 +117,13 @@ export async function handleWebhook(req, res) {
     console.log("Payment succeeded:", paymentIntent.id);
 
     try {
-      const { userId, clerkId, orderItems, shippingAddress, totalPrice } = paymentIntent.metadata;
+      const { userId, orderItems, shippingAddress, totalPrice } =
+        paymentIntent.metadata;
 
       // Check if order already exists (prevent duplicates)
-      const existingOrder = await Order.findOne({ "paymentResult.id": paymentIntent.id });
+      const existingOrder = await Order.findOne({
+        "paymentResult.id": paymentIntent.id,
+      });
       if (existingOrder) {
         console.log("Order already exists for payment:", paymentIntent.id);
         return res.json({ received: true });
@@ -123,7 +132,6 @@ export async function handleWebhook(req, res) {
       // create order
       const order = await Order.create({
         user: userId,
-        clerkId,
         orderItems: JSON.parse(orderItems),
         shippingAddress: JSON.parse(shippingAddress),
         paymentResult: {

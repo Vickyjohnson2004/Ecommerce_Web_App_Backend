@@ -1,43 +1,57 @@
-import { useAuth } from "@clerk/clerk-expo";
 import axios from "axios";
-import { useEffect } from "react";
+import * as SecureStore from "expo-secure-store";
 
-// // localhost will work in simulator
-const API_URL = "http://localhost:3000/api";
-
-// prod url will work in your physical device
-// const API_URL = "https://ecommerce-backend-git-main-victor-johnsons-projects.vercel.app";
+const API_URL = "http://10.147.66.225:3000/api";
 
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 15000, // ✅ prevent hanging requests
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
 });
 
-export const useApi = () => {
-  const { getToken } = useAuth();
+/* -------------------------
+   REQUEST INTERCEPTOR
+-------------------------- */
+api.interceptors.request.use(
+  async (config) => {
+    try {
+      const token = await SecureStore.getItemAsync("auth_token");
 
-  useEffect(() => {
-    const interceptor = api.interceptors.request.use(async (config) => {
-      const token = await getToken();
-
-      if (token) {
+      if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
 
       return config;
-    });
+    } catch (err) {
+      console.log("Token read error:", err);
+      return config;
+    }
+  },
+  (error) => Promise.reject(error),
+);
 
-    // cleanup: remove interceptor when component unmounts
+/* -------------------------
+   RESPONSE INTERCEPTOR
+-------------------------- */
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const status = error?.response?.status;
 
-    return () => {
-      api.interceptors.request.eject(interceptor);
-    };
-  }, [getToken]);
+    if (status === 401) {
+      try {
+        await SecureStore.deleteItemAsync("auth_token");
+        console.log("Token expired → removed from storage");
+      } catch (err) {
+        console.log("Failed to clear token:", err);
+      }
+    }
 
-  return api;
-};
+    return Promise.reject(error);
+  },
+);
 
-// on every single req, we would like have an auth token so that our backend knows that we're authenticated
-// we're including the auth token under the auth headers
+export default api;

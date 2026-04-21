@@ -18,17 +18,21 @@ export async function createReview(req, res) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    if (order.clerkId !== user.clerkId) {
-      return res.status(403).json({ error: "Not authorized to review this order" });
+    if (order.user.toString() !== user._id.toString()) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to review this order" });
     }
 
     if (order.status !== "delivered") {
-      return res.status(400).json({ error: "Can only review delivered orders" });
+      return res
+        .status(400)
+        .json({ error: "Can only review delivered orders" });
     }
 
     // verify product is in the order
     const productInOrder = order.orderItems.find(
-      (item) => item.product.toString() === productId.toString()
+      (item) => item.product.toString() === productId.toString(),
     );
     if (!productInOrder) {
       return res.status(400).json({ error: "Product not found in this order" });
@@ -38,7 +42,7 @@ export async function createReview(req, res) {
     const review = await Review.findOneAndUpdate(
       { productId, userId: user._id },
       { rating, orderId, productId, userId: user._id },
-      { new: true, upsert: true, runValidators: true }
+      { new: true, upsert: true, runValidators: true },
     );
 
     // update the product rating with atomic aggregation
@@ -50,7 +54,7 @@ export async function createReview(req, res) {
         averageRating: totalRating / reviews.length,
         totalReviews: reviews.length,
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedProduct) {
@@ -77,7 +81,9 @@ export async function deleteReview(req, res) {
     }
 
     if (review.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ error: "Not authorized to delete this review" });
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete this review" });
     }
 
     const productId = review.productId;

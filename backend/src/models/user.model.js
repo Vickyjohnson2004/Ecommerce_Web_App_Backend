@@ -46,14 +46,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    password: {
+      type: String,
+      required: true,
+    },
     imageUrl: {
       type: String,
       default: "",
-    },
-    clerkId: {
-      type: String,
-      unique: true,
-      required: true,
     },
     stripeCustomerId: {
       type: String,
@@ -67,7 +66,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const User = mongoose.model("User", userSchema);
