@@ -1,11 +1,12 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-const API_URL = "http://10.147.66.225:3000/api";
+const API_URL =
+  process.env.EXPO_PUBLIC_API_URL?.trim() || "http://localhost:3000/api";
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 15000, // ✅ prevent hanging requests
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

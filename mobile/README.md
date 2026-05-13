@@ -16,6 +16,12 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
+If your Android phone does not connect with the QR code, use tunnel mode:
+
+```bash
+npx expo start --tunnel
+```
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)

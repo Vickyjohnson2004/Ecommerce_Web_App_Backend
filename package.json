@@ -1,7 +1,7 @@
 {
   "name": "ecommerce_project",
   "version": "1.0.0",
-  "description": "<<<<<<< HEAD\r # Ecommerce_Web_App_Backend\r This is a full project for App, Website and Backend attached to it\r =======\r <h1 align=\"center\">✨ Full-Stack E-Commerce App (Mobile + Admin + API) ✨</h1>",
+  "description": "Full-stack ecommerce application with mobile, admin, and API components.",
   "main": "index.js",
   "engines": {
     "node": ">=20.0.0"

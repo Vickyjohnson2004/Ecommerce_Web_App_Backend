@@ -1,26 +1,72 @@
 import SafeScreen from "@/components/SafeScreen";
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useCurrentUser } from "@/hooks/useAuth";
+import * as SecureStore from "expo-secure-store";
 
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 const MENU_ITEMS = [
-  { id: 1, icon: "person-outline", title: "Edit Profile", color: "#3B82F6", action: "/profile" },
-  { id: 2, icon: "list-outline", title: "Orders", color: "#10B981", action: "/orders" },
-  { id: 3, icon: "location-outline", title: "Addresses", color: "#F59E0B", action: "/addresses" },
-  { id: 4, icon: "heart-outline", title: "Wishlist", color: "#EF4444", action: "/wishlist" },
+  {
+    id: 1,
+    icon: "person-outline",
+    title: "Edit Profile",
+    color: "#3B82F6",
+    action: "/profile",
+  },
+  {
+    id: 2,
+    icon: "list-outline",
+    title: "Orders",
+    color: "#10B981",
+    action: "/orders",
+  },
+  {
+    id: 3,
+    icon: "location-outline",
+    title: "Addresses",
+    color: "#F59E0B",
+    action: "/addresses",
+  },
+  {
+    id: 4,
+    icon: "heart-outline",
+    title: "Wishlist",
+    color: "#EF4444",
+    action: "/wishlist",
+  },
 ] as const;
 
 const ProfileScreen = () => {
-  const { signOut } = useAuth();
-  const { user } = useUser();
+  const { data, isLoading } = useCurrentUser();
+  const user = data?.user;
 
   const handleMenuPress = (action: (typeof MENU_ITEMS)[number]["action"]) => {
     if (action === "/profile") return;
     router.push(action);
   };
+
+  const signOut = async () => {
+    await SecureStore.deleteItemAsync("auth_token");
+    router.replace("/(auth)");
+  };
+
+  if (isLoading) {
+    return (
+      <SafeScreen>
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" />
+        </View>
+      </SafeScreen>
+    );
+  }
 
   return (
     <SafeScreen>
@@ -35,7 +81,7 @@ const ProfileScreen = () => {
             <View className="flex-row items-center">
               <View className="relative">
                 <Image
-                  source={user?.imageUrl}
+                  source={user?.imageUrl ?? "https://via.placeholder.com/80"}
                   style={{ width: 80, height: 80, borderRadius: 40 }}
                   transition={200}
                 />
@@ -46,10 +92,10 @@ const ProfileScreen = () => {
 
               <View className="flex-1 ml-4">
                 <Text className="text-text-primary text-2xl font-bold mb-1">
-                  {user?.firstName} {user?.lastName}
+                  {user?.name || "Guest"}
                 </Text>
                 <Text className="text-text-secondary text-sm">
-                  {user?.emailAddresses?.[0]?.emailAddress || "No email"}
+                  {user?.email || "No email"}
                 </Text>
               </View>
             </View>
@@ -72,7 +118,9 @@ const ProfileScreen = () => {
               >
                 <Ionicons name={item.icon} size={28} color={item.color} />
               </View>
-              <Text className="text-text-primary font-bold text-base">{item.title}</Text>
+              <Text className="text-text-primary font-bold text-base">
+                {item.title}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -84,8 +132,14 @@ const ProfileScreen = () => {
             activeOpacity={0.7}
           >
             <View className="flex-row items-center">
-              <Ionicons name="notifications-outline" size={22} color="#FFFFFF" />
-              <Text className="text-text-primary font-semibold ml-3">Notifications</Text>
+              <Ionicons
+                name="notifications-outline"
+                size={22}
+                color="#FFFFFF"
+              />
+              <Text className="text-text-primary font-semibold ml-3">
+                Notifications
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#666" />
           </TouchableOpacity>
@@ -99,8 +153,14 @@ const ProfileScreen = () => {
             onPress={() => router.push("/privacy-security")}
           >
             <View className="flex-row items-center">
-              <Ionicons name="shield-checkmark-outline" size={22} color="#FFFFFF" />
-              <Text className="text-text-primary font-semibold ml-3">Privacy & Security</Text>
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={22}
+                color="#FFFFFF"
+              />
+              <Text className="text-text-primary font-semibold ml-3">
+                Privacy & Security
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#666" />
           </TouchableOpacity>
@@ -110,13 +170,17 @@ const ProfileScreen = () => {
         <TouchableOpacity
           className="mx-6 mb-3 bg-surface rounded-2xl py-5 flex-row items-center justify-center border-2 border-red-500/20"
           activeOpacity={0.8}
-          onPress={() => signOut()}
+          onPress={signOut}
         >
           <Ionicons name="log-out-outline" size={22} color="#EF4444" />
-          <Text className="text-red-500 font-bold text-base ml-2">Sign Out</Text>
+          <Text className="text-red-500 font-bold text-base ml-2">
+            Sign Out
+          </Text>
         </TouchableOpacity>
 
-        <Text className="mx-6 mb-3 text-center text-text-secondary text-xs">Version 1.0.0</Text>
+        <Text className="mx-6 mb-3 text-center text-text-secondary text-xs">
+          Version 1.0.0
+        </Text>
       </ScrollView>
     </SafeScreen>
   );

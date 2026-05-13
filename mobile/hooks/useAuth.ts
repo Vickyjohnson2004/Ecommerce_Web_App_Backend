@@ -11,8 +11,8 @@ export const useSignup = () => {
       confirmPassword: string;
     }) => api.post("/auth/signup", data),
 
-    onSuccess: (res) => {
-      console.log("Signup success:", res.data);
+    onSuccess: () => {
+      return;
     },
   });
 };
@@ -23,19 +23,20 @@ export const useLogin = () => {
     mutationFn: (data: { email: string; password: string }) =>
       api.post("/auth/login", data),
 
-    onSuccess: (res) => {
-      console.log("Login success:", res.data);
+    onSuccess: () => {
+      return;
     },
   });
 };
 
 /* ---------------- CURRENT USER ---------------- */
-export const useCurrentUser = () => {
+export const useCurrentUser = (enabled = true) => {
   return useQuery({
     queryKey: ["current-user"],
     queryFn: async () => {
       const res = await api.get("/auth/me");
       return res.data;
     },
+    enabled,
   });
 };

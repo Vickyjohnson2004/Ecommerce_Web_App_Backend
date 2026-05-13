@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs";
 import path from "path";
 import cors from "cors";
 
@@ -48,11 +49,16 @@ app.get("/api/health", (req, res) => {
 });
 
 // make our app ready for deployment
-if (ENV.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../admin/dist")));
+const adminDist = path.join(__dirname, "../admin/dist");
 
-  app.get("/{*any}", (req, res) => {
-    res.sendFile(path.join(__dirname, "../admin", "dist", "index.html"));
+if (ENV.NODE_ENV === "production" && fs.existsSync(adminDist)) {
+  app.use(express.static(adminDist));
+
+  app.get("*", (req, res) => {
+    if (req.path.startsWith("/api")) {
+      return res.status(404).json({ error: "Resource not found." });
+    }
+    res.sendFile(path.join(adminDist, "index.html"));
   });
 }
 

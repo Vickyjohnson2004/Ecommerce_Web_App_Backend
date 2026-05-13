@@ -1,16 +1,26 @@
 import { Redirect, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "@clerk/clerk-expo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import { StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import * as SecureStore from "expo-secure-store";
 
 const TabsLayout = () => {
-  const { isSignedIn, isLoaded } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const insets = useSafeAreaInsets();
 
-  if (!isLoaded) return null; // for a better ux
-  if (!isSignedIn) return <Redirect href={"/(auth)"} />;
+  useEffect(() => {
+    const loadToken = async () => {
+      const token = await SecureStore.getItemAsync("auth_token");
+      setIsAuthenticated(!!token);
+    };
+
+    loadToken();
+  }, []);
+
+  if (isAuthenticated === null) return null;
+  if (!isAuthenticated) return <Redirect href="/(auth)" />;
 
   return (
     <Tabs
@@ -48,21 +58,27 @@ const TabsLayout = () => {
         name="index"
         options={{
           title: "Shop",
-          tabBarIcon: ({ color, size }) => <Ionicons name="grid" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="cart"
         options={{
           title: "Cart",
-          tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cart" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

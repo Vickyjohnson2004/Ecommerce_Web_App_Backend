@@ -15,7 +15,6 @@ export default function AuthRoutesLayout() {
         const storedToken = await SecureStore.getItemAsync("auth_token");
         setToken(storedToken);
       } catch (err) {
-        console.log("Error loading token:", err);
         setToken(null);
       } finally {
         setCheckingToken(false);
@@ -26,7 +25,7 @@ export default function AuthRoutesLayout() {
   }, []);
 
   // 2. Fetch user only if token exists (Axios interceptor handles auth)
-  const { data, isLoading } = useCurrentUser();
+  const { data, isLoading } = useCurrentUser(!!token);
 
   const loading = checkingToken || isLoading;
 

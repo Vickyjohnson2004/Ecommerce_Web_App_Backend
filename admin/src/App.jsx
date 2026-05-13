@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router";
-import LoginPage from "./pages/LoginPage";
-import { useAuth } from "@clerk/clerk-react";
+import { useQuery } from "@tanstack/react-query";
+import { currentUserQuery } from "./lib/auth";
+
 import DashboardPage from "./pages/DashboardPage";
 import ProductsPage from "./pages/ProductsPage";
 import OrdersPage from "./pages/OrdersPage";
@@ -8,18 +9,34 @@ import CustomersPage from "./pages/CustomersPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 
 import PageLoader from "./components/PageLoader";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 
 function App() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { data: user, isLoading } = useQuery(currentUserQuery());
 
-  if (!isLoaded) return <PageLoader />;
+  if (isLoading) return <PageLoader />;
+
+  const isSignedIn = !!user;
 
   return (
     <Routes>
-      <Route path="/login" element={isSignedIn ? <Navigate to={"/dashboard"} /> : <LoginPage />} />
+      {/* PUBLIC ROUTES */}
+      <Route
+        path="/login"
+        element={isSignedIn ? <Navigate to="/dashboard" /> : <Login />}
+      />
+      <Route
+        path="/signup"
+        element={isSignedIn ? <Navigate to="/dashboard" /> : <Signup />}
+      />
 
-      <Route path="/" element={isSignedIn ? <DashboardLayout /> : <Navigate to={"/login"} />}>
-        <Route index element={<Navigate to={"dashboard"} />} />
+      {/* PROTECTED ROUTES */}
+      <Route
+        path="/"
+        element={isSignedIn ? <DashboardLayout /> : <Navigate to="/login" />}
+      >
+        <Route index element={<Navigate to="dashboard" />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="orders" element={<OrdersPage />} />
